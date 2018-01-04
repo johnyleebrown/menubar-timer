@@ -1,14 +1,12 @@
-package app;
+package main;
 
-import static app.Helper.calculateNextTime;
+import static main.Helper.calculateNextTime;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.ResourceBundle;
 
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableArray;
 import javafx.collections.ObservableIntegerArray;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -16,8 +14,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-
-import app.Helper;
 
 public class Controller implements Initializable {
 

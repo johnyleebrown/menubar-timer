@@ -1,7 +1,4 @@
-package app;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableIntegerArray;
+package main;
 
 /**
  * Created by Greg on 1/3/18.
