@@ -49,4 +49,10 @@ public class Timer {
     public void setCycles(int cycles) {
         this.cycles.set(cycles);
     }
+
+    public Timer(IntegerProperty workMinutes, IntegerProperty restMinutes, IntegerProperty cycles) {
+        this.workMinutes = workMinutes;
+        this.restMinutes = restMinutes;
+        this.cycles = cycles;
+    }
 }

@@ -65,7 +65,7 @@
             <VBox prefHeight="54.0" prefWidth="90.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
                <children>
                   <Button fx:id="workPlus" mnemonicParsing="false" onAction="#workPlusClicked" prefHeight="27.0" prefWidth="27.0" text="+" />
-                  <Button fx:id="workMinus" mnemonicParsing="false" prefHeight="27.0" prefWidth="27.0" text="-" />
+                  <Button fx:id="workMinus" mnemonicParsing="false" onAction="#workMinusClicked" prefHeight="27.0" prefWidth="27.0" text="-" />
                </children>
             </VBox>
          </children>
