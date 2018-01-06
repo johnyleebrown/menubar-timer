@@ -1,4 +1,6 @@
-package main;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * Created by Greg on 1/3/18.
@@ -46,5 +48,12 @@ public class Helper {
         workTime[0] = h;
         workTime[1] = t;
         workTime[2] = o;
+    }
+
+    public static void printDate() {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        final String strDate = simpleDateFormat.format(calendar.getTime());
+        System.out.println(strDate);
     }
 }

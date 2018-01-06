@@ -1,12 +1,10 @@
-package main;
-
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
 /**
  * Created by Greg on 1/3/18.
  */
-public class Timer {
+public class Timers {
 
     IntegerProperty workMinutes = new SimpleIntegerProperty();
 
@@ -50,9 +48,16 @@ public class Timer {
         this.cycles.set(cycles);
     }
 
-    public Timer(IntegerProperty workMinutes, IntegerProperty restMinutes, IntegerProperty cycles) {
+    public Timers(IntegerProperty workMinutes, IntegerProperty restMinutes, IntegerProperty cycles) {
         this.workMinutes = workMinutes;
         this.restMinutes = restMinutes;
         this.cycles = cycles;
+    }
+
+    @Override
+    public String toString() {
+        return "Timers{" +
+                "workMinutes=" + workMinutes +
+                '}';
     }
 }
