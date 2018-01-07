@@ -23,7 +23,7 @@ import javafx.util.Duration;
 
 public class PaneController implements Initializable {
 
-    private Timers currentTimer;
+//    private Timers currentTimer;
 
     private static SimpleIntegerProperty overallWork;
 
@@ -55,7 +55,7 @@ public class PaneController implements Initializable {
 
         overallWork = new SimpleIntegerProperty(Integer.valueOf(workHundreds.getText() + workTens.getText() + workOnes.getText()));
 
-        this.currentTimer = new Timers(overallWork, new SimpleIntegerProperty(0), new SimpleIntegerProperty(1));
+//        this.currentTimer = new Timers(overallWork, new SimpleIntegerProperty(0), new SimpleIntegerProperty(1));
     }
 
     @FXML
@@ -92,13 +92,13 @@ public class PaneController implements Initializable {
     }
 
     public void setCurrentTimer() {
-        if (currentTimer != null) {
-            currentTimer.workMinutes = overallWork;
-            currentTimer.restMinutes = new SimpleIntegerProperty(0);
-            currentTimer.cycles = new SimpleIntegerProperty(1);
-        } else {
-            this.currentTimer = new Timers(overallWork, new SimpleIntegerProperty(0), new SimpleIntegerProperty(1));
-        }
+//        if (currentTimer != null) {
+//            currentTimer.workMinutes = overallWork;
+//            currentTimer.restMinutes = new SimpleIntegerProperty(0);
+//            currentTimer.cycles = new SimpleIntegerProperty(1);
+//        } else {
+//            this.currentTimer = new Timers(overallWork, new SimpleIntegerProperty(0), new SimpleIntegerProperty(1));
+//        }
     }
 
     @FXML

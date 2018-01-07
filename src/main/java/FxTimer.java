@@ -1,11 +1,19 @@
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.util.Duration;
 
 /**
  * Created by Greg on 1/4/18.
  */
 public class FxTimer {
+
+    IntegerProperty workMinutes = new SimpleIntegerProperty();
+
+    IntegerProperty restMinutes = new SimpleIntegerProperty();
+
+    IntegerProperty cycles = new SimpleIntegerProperty();
 
     private Timeline timeline;
 

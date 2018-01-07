@@ -22,4 +22,12 @@
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>eu.hansolo</groupId>
+            <artifactId>tilesfx</artifactId>
+            <version>1.5.2</version>
+        </dependency>
+    </dependencies>
+
 </project>

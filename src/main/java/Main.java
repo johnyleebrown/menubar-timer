@@ -1,13 +1,26 @@
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Optional;
 
+import eu.hansolo.tilesfx.Tile;
+import eu.hansolo.tilesfx.TileBuilder;
+import eu.hansolo.tilesfx.events.TileEvent;
+import eu.hansolo.tilesfx.skins.BarChartItem;
+import eu.hansolo.tilesfx.tools.FlowGridPane;
+import eu.hansolo.tilesfx.tools.Helper;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -19,7 +32,31 @@ public class Main extends Application {
 
     private static Stage stage;
 
+    private Tile sliderTile;
+
     private static TrayIcon trayIcon = null;
+
+    @Override
+    public void init() {
+        sliderTile = TileBuilder.create()
+                .skinType(Tile.SkinType.SLIDER)
+                .prefSize(170, 170)
+                .description("Work Time")
+                .unit(" min.")
+                .decimals(0)
+                .minValue(0)
+                .maxValue(130)
+                .value(45)
+                .barBackgroundColor(Tile.FOREGROUND)
+                .build();
+
+        sliderTile.setOnTileEvent(e -> {
+            TileEvent.EventType type = e.getEventType();
+            if (TileEvent.EventType.VALUE_CHANGED == type) {
+                System.out.println(sliderTile.getValue());
+            }
+        });
+    }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -32,9 +69,26 @@ public class Main extends Application {
         javax.swing.SwingUtilities.invokeLater(this::addTrayIcon);
 
         Scene scene = new Scene(pane, 534, 148);
-        primaryStage.setScene(scene);
+
+        FlowGridPane pane2 = new FlowGridPane(8, 5, sliderTile);
+
+        pane2.setHgap(5);
+        pane2.setVgap(5);
+        pane2.setAlignment(Pos.CENTER);
+        pane2.setCenterShape(true);
+        pane2.setPadding(new javafx.geometry.Insets(5));
+        pane2.setBackground(new Background(new BackgroundFill(Color.web("#101214"), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        Scene scene2 = new Scene(pane2);
+
+        primaryStage.setScene(scene2);
+
+//        primaryStage.setScene(scene);
         primaryStage.setResizable(false);
         primaryStage.setOnCloseRequest(this::onClose);
+        primaryStage.show();
+
+
 
         setPrimaryStage(primaryStage);
     }
@@ -56,7 +110,6 @@ public class Main extends Application {
             MenuItem stopItem = new MenuItem("Stop");
             stopItem.addActionListener(event -> {
                 System.out.println("Stop");
-                Helper.printDate();
                 FxTimer.getInstance().stopTimer();
             });
 
