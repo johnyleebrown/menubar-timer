@@ -6,7 +6,11 @@
 
     <groupId>menubar-timer</groupId>
     <artifactId>menubar-timer</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.0</version>
+
+    <properties>
+        <rococoa-version>0.5</rococoa-version>
+    </properties>
 
     <build>
         <plugins>
@@ -27,6 +31,16 @@
             <groupId>eu.hansolo</groupId>
             <artifactId>tilesfx</artifactId>
             <version>1.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.rococoa</groupId>
+            <artifactId>rococoa-core</artifactId>
+            <version>${rococoa-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.rococoa</groupId>
+            <artifactId>rococoa-cocoa</artifactId>
+            <version>${rococoa-version}</version>
         </dependency>
     </dependencies>
 

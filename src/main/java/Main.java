@@ -1,46 +1,48 @@
 
 import java.awt.*;
-import java.io.IOException;
-import java.util.Optional;
 
 import eu.hansolo.tilesfx.Tile;
 import eu.hansolo.tilesfx.TileBuilder;
 import eu.hansolo.tilesfx.events.TileEvent;
-import eu.hansolo.tilesfx.skins.BarChartItem;
+import eu.hansolo.tilesfx.fonts.Fonts;
 import eu.hansolo.tilesfx.tools.FlowGridPane;
-import eu.hansolo.tilesfx.tools.Helper;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-
 public class Main extends Application {
 
-    @FXML
-    private PaneController paneController;
-
+    // Nodes
     private static Stage stage;
-
-    private Tile sliderTile;
-
     private static TrayIcon trayIcon = null;
+    private Tile sliderWorkTimeTile;
+    private Tile sliderRestTimeTile;
+    private Tile plusMinusCyclesTile;
+    private Tile startTile;
+
+    // Parameters
+    private static final int SIZE_TILE_WIDTH = 170;
+    private static final int SIZE_TILE_HEIGHT = 170;
+    private static final int SIZE_TILE_START_WIDTH = 170;
+
+    // Timer
+    private boolean timerStarted = false;
 
     @Override
     public void init() {
-        sliderTile = TileBuilder.create()
+        sliderWorkTimeTile = TileBuilder.create()
                 .skinType(Tile.SkinType.SLIDER)
-                .prefSize(170, 170)
+                .prefSize(SIZE_TILE_WIDTH, SIZE_TILE_HEIGHT)
                 .description("Work Time")
                 .unit(" min.")
                 .decimals(0)
@@ -50,47 +52,106 @@ public class Main extends Application {
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
-        sliderTile.setOnTileEvent(e -> {
+        sliderRestTimeTile = TileBuilder.create()
+                .skinType(Tile.SkinType.SLIDER)
+                .prefSize(SIZE_TILE_WIDTH, SIZE_TILE_HEIGHT)
+                .description("Rest Time")
+                .unit(" min.")
+                .decimals(0)
+                .minValue(0)
+                .maxValue(60)
+                .value(10)
+                .barBackgroundColor(Tile.FOREGROUND)
+                .build();
+
+        plusMinusCyclesTile = TileBuilder.create()
+                .skinType(Tile.SkinType.PLUS_MINUS)
+                .prefSize(SIZE_TILE_WIDTH, SIZE_TILE_HEIGHT)
+                .decimals(0)
+                .maxValue(30)
+                .minValue(0)
+                .description("Cycles")
+                .build();
+
+        Text startText = new Text("Start");
+        startText.setFont(Fonts.latoRegular(24));
+
+        startTile = TileBuilder.create()
+                .skinType(Tile.SkinType.CUSTOM)
+                .prefSize(SIZE_TILE_START_WIDTH, SIZE_TILE_HEIGHT)
+                .roundedCorners(true)
+                .backgroundColor(Tile.TileColor.LIGHT_GREEN.color)
+                .graphic(startText)
+                .build();
+
+        // Handle events
+        sliderWorkTimeTile.setOnTileEvent(e -> {
             TileEvent.EventType type = e.getEventType();
             if (TileEvent.EventType.VALUE_CHANGED == type) {
-                System.out.println(sliderTile.getValue());
+                System.out.println(sliderWorkTimeTile.getValue());
+            }
+        });
+
+        sliderRestTimeTile.setOnTileEvent(e -> {
+            TileEvent.EventType type = e.getEventType();
+            if (TileEvent.EventType.VALUE_CHANGED == type) {
+                System.out.println(sliderRestTimeTile.getValue());
+            }
+        });
+
+        plusMinusCyclesTile.setOnTileEvent(e -> {
+            TileEvent.EventType type = e.getEventType();
+            if (TileEvent.EventType.VALUE == type) {
+                System.out.println(plusMinusCyclesTile.getValue());
+            }
+        });
+
+        startTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (timerStarted) {
+                startTile.setBackgroundColor(Tile.TileColor.LIGHT_GREEN.color);
+                startText.setText("Start");
+                sliderWorkTimeTile.setDisable(false);
+                sliderRestTimeTile.setDisable(false);
+                plusMinusCyclesTile.setDisable(false);
+
+
+
+            } else {
+                startTile.setBackgroundColor(Tile.TileColor.LIGHT_RED.color);
+                startText.setText("Stop");
+                sliderWorkTimeTile.setDisable(true);
+                sliderRestTimeTile.setDisable(true);
+                plusMinusCyclesTile.setDisable(true);
+                timerStarted = true;
             }
         });
     }
 
+
     @Override
-    public void start(Stage primaryStage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Pane.fxml"));
-        Pane pane = loader.load();
-        paneController = loader.getController();
+    public void start(Stage primaryStage) {
 
         Platform.setImplicitExit(false);
-
         javax.swing.SwingUtilities.invokeLater(this::addTrayIcon);
 
-        Scene scene = new Scene(pane, 534, 148);
+        FlowGridPane pane = new FlowGridPane(4, 1,
+                sliderWorkTimeTile, sliderRestTimeTile,
+                plusMinusCyclesTile, startTile);
 
-        FlowGridPane pane2 = new FlowGridPane(8, 5, sliderTile);
+        pane.setHgap(5);
+        pane.setVgap(5);
+        pane.setAlignment(Pos.CENTER);
+        pane.setCenterShape(true);
+        pane.setPadding(new javafx.geometry.Insets(5));
+        pane.setBackground(new Background(new BackgroundFill(Color.web("#101214"), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        pane2.setHgap(5);
-        pane2.setVgap(5);
-        pane2.setAlignment(Pos.CENTER);
-        pane2.setCenterShape(true);
-        pane2.setPadding(new javafx.geometry.Insets(5));
-        pane2.setBackground(new Background(new BackgroundFill(Color.web("#101214"), CornerRadii.EMPTY, Insets.EMPTY)));
-
-        Scene scene2 = new Scene(pane2);
-
-        primaryStage.setScene(scene2);
-
-//        primaryStage.setScene(scene);
+        Scene scene = new Scene(pane);
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("Timer");
         primaryStage.setResizable(false);
         primaryStage.setOnCloseRequest(this::onClose);
         primaryStage.show();
-
-
-
-        setPrimaryStage(primaryStage);
+        stage = primaryStage;
     }
 
     private void addTrayIcon() {
@@ -162,11 +223,7 @@ public class Main extends Application {
     }
 
     private void onClose(WindowEvent event) {
-        paneController.setCurrentTimer();
-    }
-
-    private void setPrimaryStage(Stage stage) {
-        Main.stage = stage;
+        System.out.println("closing");
     }
 
     public static void main(String[] args) {
