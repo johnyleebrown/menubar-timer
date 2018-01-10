@@ -5,17 +5,16 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.util.Duration;
 
 /**
+ * TODO: builder
+ *
  * Created by Greg on 1/4/18.
  */
 public class FxTimer {
 
-    IntegerProperty workMinutes = new SimpleIntegerProperty();
-
-    IntegerProperty restMinutes = new SimpleIntegerProperty();
-
-    IntegerProperty cycles = new SimpleIntegerProperty();
-
     private Timeline timeline;
+    private int minutes;
+    private int cycles;
+    private boolean isRunning;
 
     private FxTimer() {
     }
@@ -28,22 +27,30 @@ public class FxTimer {
         return Helper.INSTANCE;
     }
 
+    public void setTimer(int workMinutes, int cycles, boolean isRunning) {
+        this.minutes = workMinutes;
+        this.cycles = cycles;
+        this.isRunning = isRunning;
+    }
+
     public void startTimer() {
         timeline = new Timeline(new KeyFrame(Duration.seconds(10)));
         timeline.setCycleCount(5);
         timeline.play();
-        System.out.println("the timer has started");
-    }
-
-    public void stopTimer() {
-        System.out.println(timeline.getCurrentTime());
-        System.out.println(timeline.getStatus());
-        timeline.stop();
-        System.out.println("the timer stopped");
+        System.out.println("The timer has started");
     }
 
     public void pauseTimer() {
         timeline.pause();
+    }
+
+    public void resumeTimer() {
+        timeline.pause();
+    }
+
+    public void stopTimer() {
+        timeline.stop();
+        System.out.println("The timer stopped");
     }
 
 }
