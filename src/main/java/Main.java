@@ -8,6 +8,9 @@ import eu.hansolo.tilesfx.fonts.Fonts;
 import eu.hansolo.tilesfx.tools.FlowGridPane;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -41,9 +44,9 @@ public class Main extends Application {
 
     // Timer
     private boolean isRunning = false;
-    private int workMinutes;
-    private int restMinutes;
-    private int cycles;
+    private Integer workMinutes;
+    private Integer restMinutes;
+    private Integer cycles;
 
     @Override
     public void init() {
@@ -56,7 +59,7 @@ public class Main extends Application {
                 .decimals(0)
                 .minValue(0)
                 .maxValue(130)
-                .value(45)
+                .value(1)
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
@@ -68,7 +71,7 @@ public class Main extends Application {
                 .decimals(0)
                 .minValue(0)
                 .maxValue(60)
-                .value(10)
+                .value(0)
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
@@ -152,8 +155,18 @@ public class Main extends Application {
                 pane.add(pauseTile, 1, 1);
                 pane.add(stopTile, 2, 1);
 
-//                FxTimer.getInstance().setTimer(workMinutes + restMinutes, cycles, isRunning);
-//                FxTimer.getInstance().startTimer();
+                FxTimer.getInstance().setTimer(getTotalTime(), getCycles(), isRunning);
+                FxTimer.getInstance().setOnFinished(e2 -> {
+                    if (isRunning) {
+                        System.out.println("The timer finished");
+                        disableTiles(false);
+                        isRunning = false;
+                        pane.getChildren().remove(3, 6);
+                        pane.add(startTile, 0, 1);
+                        pane.setColumnSpan(startTile, 3);
+                    }
+                });
+                FxTimer.getInstance().startTimer();
             }
         });
 
@@ -161,15 +174,14 @@ public class Main extends Application {
             if (isRunning) {
                 disableTiles(false);
                 isRunning = false;
-
                 pane.getChildren().remove(3, 6);
                 pane.add(startTile, 0, 1);
                 pane.setColumnSpan(startTile, 3);
-
-//                FxTimer.getInstance().stopTimer();
+                FxTimer.getInstance().stopTimer();
             }
         });
     }
+
     FlowGridPane pane;
     @Override
     public void start(Stage primaryStage) {
@@ -194,6 +206,7 @@ public class Main extends Application {
         primaryStage.setOnCloseRequest(this::onClose);
         primaryStage.show();
         stage = primaryStage;
+
     }
 
     private void addTrayIcon() {
@@ -273,6 +286,16 @@ public class Main extends Application {
 
     private void onClose(WindowEvent event) {
         System.out.println("closing");
+    }
+
+    private int getTotalTime() {
+        int work = workMinutes == null ? (int) Math.round(sliderWorkTimeTile.getValue()) : workMinutes;
+        int rest = restMinutes == null ? (int) Math.round(sliderRestTimeTile.getValue()) : restMinutes;
+        return work + rest;
+    }
+
+    private int getCycles() {
+        return cycles == null ? (int) plusMinusCyclesTile.getValue() : cycles;
     }
 
     public static void main(String[] args) {
