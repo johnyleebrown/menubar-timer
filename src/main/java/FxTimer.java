@@ -64,6 +64,7 @@ public class FxTimer {
     }
 
     public void stopTimer() {
+        System.out.println(timeline.getCurrentTime());
         timeline.stop();
         System.out.println("The timer stopped");
         printDate();

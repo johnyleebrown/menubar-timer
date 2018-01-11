@@ -27,8 +27,9 @@ import javafx.stage.WindowEvent;
 public class Main extends Application {
 
     // Nodes
-    private static Stage stage;
-    private static TrayIcon trayIcon = null;
+    private Stage stage;
+    private FlowGridPane pane;
+    private TrayIcon trayIcon = null;
     private Tile sliderWorkTimeTile;
     private Tile sliderRestTimeTile;
     private Tile plusMinusCyclesTile;
@@ -36,6 +37,7 @@ public class Main extends Application {
     private Tile pauseTile;
     private Tile stopTile;
     private Tile countdownTile;
+    private Tile resumeTile;
 
     // Parameters
     private static final int SIZE_TILE_WIDTH = 170;
@@ -112,12 +114,23 @@ public class Main extends Application {
                 .graphic(pauseText)
                 .build();
 
+        Text resumeText = new Text("Resume");
+        resumeText.setFont(Fonts.latoRegular(24));
+
+        resumeTile = TileBuilder.create()
+                .skinType(Tile.SkinType.CUSTOM)
+                .prefSize(SIZE_TILE_WIDTH, SIZE_TILE_HEIGHT)
+                .roundedCorners(true)
+                .backgroundColor(Tile.TileColor.GREEN.color)
+                .graphic(resumeText)
+                .build();
+
         Text stopText = new Text("Stop");
         stopText.setFont(Fonts.latoRegular(24));
 
         stopTile = TileBuilder.create()
                 .skinType(Tile.SkinType.CUSTOM)
-                .prefSize(SIZE_TILE_WIDTH, SIZE_TILE_HEIGHT)
+                .prefSize(340, SIZE_TILE_HEIGHT)
                 .roundedCorners(true)
                 .backgroundColor(Tile.TileColor.LIGHT_RED.color)
                 .graphic(stopText)
@@ -146,22 +159,23 @@ public class Main extends Application {
         });
 
         startTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (cycles == null || cycles == 0 || (workMinutes == 0 && restMinutes == 0)) return;
             if (!isRunning) {
                 disableTiles(true);
                 isRunning = true;
 
                 pane.getChildren().remove(startTile);
-                pane.add(countdownTile, 0, 1);
-                pane.add(pauseTile, 1, 1);
-                pane.add(stopTile, 2, 1);
+                pane.add(pauseTile, 0, 1);
+                pane.add(stopTile, 1, 1);
+                pane.setColumnSpan(stopTile, 2);
 
                 FxTimer.getInstance().setTimer(getTotalTime(), getCycles(), isRunning);
-                FxTimer.getInstance().setOnFinished(e2 -> {
+                FxTimer.getInstance().setOnFinished(event2 -> {
                     if (isRunning) {
                         System.out.println("The timer finished");
                         disableTiles(false);
                         isRunning = false;
-                        pane.getChildren().remove(3, 6);
+                        pane.getChildren().remove(3, 5);
                         pane.add(startTile, 0, 1);
                         pane.setColumnSpan(startTile, 3);
                     }
@@ -170,19 +184,38 @@ public class Main extends Application {
             }
         });
 
+        pauseTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (isRunning) {
+                FxTimer.getInstance().pauseTimer();
+                pane.getChildren().remove(3, 5);
+                pane.add(resumeTile, 0, 1);
+                pane.add(stopTile, 1, 1);
+            }
+        });
+
+        resumeTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+            if (isRunning) {
+                FxTimer.getInstance().resumeTimer();
+                pane.getChildren().remove(3, 5);
+                pane.add(pauseTile, 0, 1);
+                pane.add(stopTile, 1, 1);
+            }
+        });
+
         stopTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
             if (isRunning) {
                 disableTiles(false);
                 isRunning = false;
-                pane.getChildren().remove(3, 6);
+
+                FxTimer.getInstance().stopTimer();
+
+                pane.getChildren().remove(3, 5);
                 pane.add(startTile, 0, 1);
                 pane.setColumnSpan(startTile, 3);
-                FxTimer.getInstance().stopTimer();
             }
         });
     }
 
-    FlowGridPane pane;
     @Override
     public void start(Stage primaryStage) {
         Platform.setImplicitExit(false);
@@ -197,7 +230,8 @@ public class Main extends Application {
         pane.setAlignment(Pos.CENTER);
         pane.setCenterShape(true);
         pane.setPadding(new javafx.geometry.Insets(5));
-        pane.setBackground(new Background(new BackgroundFill(Color.web("#101214"), CornerRadii.EMPTY, Insets.EMPTY)));
+        pane.setBackground(new Background(new BackgroundFill(Color.web("#101214"),
+                CornerRadii.EMPTY, Insets.EMPTY)));
 
         Scene scene = new Scene(pane);
         primaryStage.setScene(scene);
