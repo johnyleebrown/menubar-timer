@@ -1,5 +1,9 @@
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Vector;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import eu.hansolo.tilesfx.Tile;
 import eu.hansolo.tilesfx.TileBuilder;
@@ -8,12 +12,8 @@ import eu.hansolo.tilesfx.fonts.Fonts;
 import eu.hansolo.tilesfx.tools.FlowGridPane;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
@@ -23,13 +23,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import sun.awt.AppContext;
 
 public class Main extends Application {
 
     // Nodes
     private Stage stage;
     private FlowGridPane pane;
-    private TrayIcon trayIcon = null;
+    private TrayIcon trayIcon;
     private Tile sliderWorkTimeTile;
     private Tile sliderRestTimeTile;
     private Tile plusMinusCyclesTile;
@@ -50,6 +51,11 @@ public class Main extends Application {
     private Integer restMinutes;
     private Integer cycles;
 
+    // Icon
+    private final Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/icon2.png"));
+    private PopupMenu popupStop;
+    private PopupMenu popupStart;
+
     @Override
     public void init() {
         // Create tiles
@@ -65,6 +71,8 @@ public class Main extends Application {
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
+        workMinutes = (int) Math.round(sliderWorkTimeTile.getValue());
+
         sliderRestTimeTile = TileBuilder.create()
                 .skinType(Tile.SkinType.SLIDER)
                 .prefSize(SIZE_TILE_WIDTH, SIZE_TILE_HEIGHT)
@@ -77,6 +85,8 @@ public class Main extends Application {
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
+        restMinutes = (int) Math.round(sliderRestTimeTile.getValue());
+
         plusMinusCyclesTile = TileBuilder.create()
                 .skinType(Tile.SkinType.PLUS_MINUS)
                 .prefSize(SIZE_TILE_WIDTH, SIZE_TILE_HEIGHT)
@@ -85,6 +95,8 @@ public class Main extends Application {
                 .minValue(0)
                 .description("Cycles")
                 .build();
+
+        cycles = (int) plusMinusCyclesTile.getValue();
 
         Text startText = new Text("Start");
         startText.setFont(Fonts.latoRegular(24));
@@ -159,29 +171,7 @@ public class Main extends Application {
         });
 
         startTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-            if (cycles == null || cycles == 0 || (workMinutes == 0 && restMinutes == 0)) return;
-            if (!isRunning) {
-                disableTiles(true);
-                isRunning = true;
-
-                pane.getChildren().remove(startTile);
-                pane.add(pauseTile, 0, 1);
-                pane.add(stopTile, 1, 1);
-                pane.setColumnSpan(stopTile, 2);
-
-                FxTimer.getInstance().setTimer(getTotalTime(), getCycles(), isRunning);
-                FxTimer.getInstance().setOnFinished(event2 -> {
-                    if (isRunning) {
-                        System.out.println("The timer finished");
-                        disableTiles(false);
-                        isRunning = false;
-                        pane.getChildren().remove(3, 5);
-                        pane.add(startTile, 0, 1);
-                        pane.setColumnSpan(startTile, 3);
-                    }
-                });
-                FxTimer.getInstance().startTimer();
-            }
+            actionOnStart();
         });
 
         pauseTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
@@ -203,23 +193,53 @@ public class Main extends Application {
         });
 
         stopTile.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
-            if (isRunning) {
+            actionOnStop();
+        });
+    }
+
+    private void actionOnStop() {
+        if (isRunning) {
+            disableTiles(false);
+            isRunning = false;
+            FxTimer.getInstance().stopTimer();
+            pane.getChildren().remove(3, 5);
+            pane.add(startTile, 0, 1);
+            pane.setColumnSpan(startTile, 3);
+            javax.swing.SwingUtilities.invokeLater(() -> addTrayIcon(Actions.STOP));
+        }
+    }
+
+    private boolean actionOnStart() {
+        if (((workMinutes == null || workMinutes == 0) && (restMinutes == null || restMinutes == 0)) || cycles == null || cycles == 0) return false;
+        if (!isRunning) {
+            disableTiles(true);
+            isRunning = true;
+
+            pane.getChildren().remove(startTile);
+            pane.add(pauseTile, 0, 1);
+            pane.add(stopTile, 1, 1);
+            pane.setColumnSpan(stopTile, 2);
+
+            FxTimer.getInstance().setTimer(getTotalTime(), getCycles(), isRunning);
+            FxTimer.getInstance().setOnFinished(event2 -> {
+                System.out.println("The timer finished");
                 disableTiles(false);
                 isRunning = false;
-
-                FxTimer.getInstance().stopTimer();
-
                 pane.getChildren().remove(3, 5);
                 pane.add(startTile, 0, 1);
                 pane.setColumnSpan(startTile, 3);
-            }
-        });
+                javax.swing.SwingUtilities.invokeLater(() -> addTrayIcon(Actions.STOP));
+            });
+            FxTimer.getInstance().startTimer();
+            javax.swing.SwingUtilities.invokeLater(() -> addTrayIcon(Actions.START));
+        }
+        return true;
     }
 
     @Override
     public void start(Stage primaryStage) {
         Platform.setImplicitExit(false);
-        javax.swing.SwingUtilities.invokeLater(this::addTrayIcon);
+        javax.swing.SwingUtilities.invokeLater(() -> addTrayIcon(Actions.STOP));
 
         pane = new FlowGridPane(3, 2,
                 sliderWorkTimeTile, sliderRestTimeTile, plusMinusCyclesTile, startTile);
@@ -240,68 +260,73 @@ public class Main extends Application {
         primaryStage.setOnCloseRequest(this::onClose);
         primaryStage.show();
         stage = primaryStage;
-
     }
 
-    private void addTrayIcon() {
+    private void addTrayIcon(Actions action) {
+        SystemTray tray = SystemTray.getSystemTray();
+
+//        if (action == Actions.START) {
+//            popupStop.remove(0);
+//            return;
+//        }
+
+        trayIcon = new TrayIcon(image);
+
+        // Menu items
+        MenuItem pauseItem = new MenuItem("Pause");
+        pauseItem.addActionListener(event -> {
+            System.out.println("Pause from menu bar");
+        });
+
+        MenuItem stopItem = new MenuItem("Stop");
+        stopItem.addActionListener(event -> Platform.runLater(() -> {
+            System.out.println("Start from menu bar");
+            actionOnStop();
+        }));
+
+        MenuItem prefItem = new MenuItem("Preferences");
+        prefItem.addActionListener(event -> Platform.runLater(() -> {
+            System.out.println("Preferences from menu bar");
+            showPrimaryStage();
+        }));
+
+        MenuItem exitItem = new MenuItem("Quit");
+        exitItem.addActionListener(event -> {
+            System.out.println("Quit from menu bar");
+            Platform.exit();
+            tray.remove(trayIcon);
+        });
+
+        MenuItem startItem = new MenuItem("Start");
+        startItem.addActionListener(event -> Platform.runLater(() -> {
+            System.out.println("Start from menu bar");
+            actionOnStart();
+        }));
+
         try {
-            SystemTray tray = SystemTray.getSystemTray();
-            final Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/icon2.png"));
-            trayIcon = new TrayIcon(image);
-
-            final PopupMenu popupStart = new PopupMenu();
-            final PopupMenu popupStop = new PopupMenu();
-
-            MenuItem pauseItem = new MenuItem("Pause");
-            pauseItem.addActionListener(event -> {
-                System.out.println("Pause");
-            });
-
-            MenuItem stopItem = new MenuItem("Stop");
-            stopItem.addActionListener(event -> {
-                System.out.println("Stop");
-                FxTimer.getInstance().stopTimer();
-            });
-
-            MenuItem prefItem = new MenuItem("Preferences");
-            prefItem.addActionListener(event -> {
-                System.out.println("Preferences");
-                Platform.runLater(this::showPrimaryStage);
-            });
-
-            MenuItem exitItem = new MenuItem("Quit");
-            exitItem.addActionListener(event -> {
-                System.out.println("Quit");
-                Platform.exit();
-                tray.remove(trayIcon);
-            });
-
-            MenuItem startItem = new MenuItem("Start");
-            startItem.addActionListener(event -> {
-                System.out.println("Start");
-
-                tray.remove(trayIcon);
-                popupStop.add(pauseItem);
-                popupStop.add(stopItem);
-                popupStop.add(prefItem);
-                popupStop.addSeparator();
-                popupStop.add(exitItem);
-                trayIcon.setPopupMenu(popupStop);
-                try {
+            switch (action) {
+                case START:
+                    popupStop = new PopupMenu();
+                    popupStop.add(pauseItem);
+                    popupStop.add(stopItem);
+                    popupStop.add(prefItem);
+                    popupStop.addSeparator();
+                    popupStop.add(exitItem);
+                    tray.remove(trayIcon);
+                    trayIcon.setPopupMenu(popupStop);
                     tray.add(trayIcon);
-                } catch (AWTException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            popupStart.add(startItem);
-            popupStart.add(prefItem);
-            popupStart.addSeparator();
-            popupStart.add(exitItem);
-            trayIcon.setPopupMenu(popupStart);
-            tray.add(trayIcon);
+                case STOP:
+                    popupStart = new PopupMenu();
+                    popupStart.add(startItem);
+                    popupStart.add(prefItem);
+                    popupStart.addSeparator();
+                    popupStart.add(exitItem);
+                    tray.remove(trayIcon);
+                    trayIcon.setPopupMenu(popupStart);
+                    tray.add(trayIcon);
+            }
         } catch (AWTException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
         }
     }
 
@@ -319,7 +344,7 @@ public class Main extends Application {
     }
 
     private void onClose(WindowEvent event) {
-        System.out.println("closing");
+        System.out.println("Closing");
     }
 
     private int getTotalTime() {
@@ -330,6 +355,10 @@ public class Main extends Application {
 
     private int getCycles() {
         return cycles == null ? (int) plusMinusCyclesTile.getValue() : cycles;
+    }
+
+    private enum Actions {
+        START, STOP, PAUSE, RESUME
     }
 
     public static void main(String[] args) {
