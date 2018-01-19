@@ -1,9 +1,11 @@
+package me.grigorii.menubartimer;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
 /**
- * Created by Greg on 1/3/18.
+ * Created by github.com/johnyleebrown
  */
 public class Helper {
 

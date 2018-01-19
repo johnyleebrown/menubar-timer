@@ -1,28 +1,23 @@
+package me.grigorii.menubartimer;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-import javafx.animation.Animation;
-import javafx.animation.AnimationTimer;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.util.Duration;
 
 /**
- * TODO: builder
- *
- * Created by Greg on 1/4/18.
+ * Created by github.com/johnyleebrown
  */
 public class FxTimer {
 
     public Timeline timeline;
     private int minutes;
     private int cycles;
-    private boolean isRunning;
 
     private FxTimer() {
         System.out.println("FxTimer constructor");
@@ -37,10 +32,9 @@ public class FxTimer {
         return Helper.INSTANCE;
     }
 
-    public void setTimer(int workMinutes, int cycles, boolean isRunning) {
+    public void setTimer(int workMinutes, int cycles) {
         this.minutes = workMinutes;
         this.cycles = cycles;
-        this.isRunning = isRunning;
     }
 
     public void startTimer() {

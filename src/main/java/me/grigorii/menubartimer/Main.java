@@ -1,5 +1,6 @@
+package me.grigorii.menubartimer;
+
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 
 import javax.swing.*;
 
@@ -22,7 +23,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import me.grigorii.menubartimer.notification.NotificationFactory;
 
+/**
+ * Created by github.com/johnyleebrown
+ */
 public class Main extends Application {
 
     // Nodes
@@ -44,7 +49,7 @@ public class Main extends Application {
     private Integer cycles;
 
     // Icon
-    private final Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/icon2.png"));
+    private final Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/Icon-16.png"));
     private PopupMenu popupMenu;
     private MenuItem startItem;
     private MenuItem stopItem;
@@ -124,7 +129,7 @@ public class Main extends Application {
                 .skinType(Tile.SkinType.CUSTOM)
                 .prefSize(170, 170)
                 .roundedCorners(true)
-                .backgroundColor(Tile.TileColor.GREEN.color)
+                .backgroundColor(Tile.TileColor.LIGHT_GREEN.color)
                 .graphic(resumeText)
                 .build();
 
@@ -188,6 +193,7 @@ public class Main extends Application {
         prefItem = new MenuItem("Preferences");
         prefItem.addActionListener(event -> Platform.runLater(() -> {
             System.out.println("Preferences from menu bar");
+            popupMenu.remove(prefItem);
             showPrimaryStage();
         }));
 
@@ -206,7 +212,8 @@ public class Main extends Application {
     }
 
     private boolean actionOnStart() {
-        if (((workMinutes == null || workMinutes == 0) && (restMinutes == null || restMinutes == 0)) || cycles == null || cycles == 0) return false;
+        if (((workMinutes == null || workMinutes == 0)
+                && (restMinutes == null || restMinutes == 0)) || cycles == null || cycles == 0) return false;
         if (!isRunning) {
             disableTiles(true);
             isRunning = true;
@@ -216,7 +223,7 @@ public class Main extends Application {
             pane.add(stopTile, 1, 1);
             pane.setColumnSpan(stopTile, 2);
 
-            FxTimer.getInstance().setTimer(getTotalTime(), getCycles(), isRunning);
+            FxTimer.getInstance().setTimer(getTotalTime(), getCycles());
             FxTimer.getInstance().setOnFinished(event2 -> {
                 if (isRunning) {
                     System.out.println("The timer finished");
@@ -230,6 +237,7 @@ public class Main extends Application {
             });
             FxTimer.getInstance().startTimer();
             SwingUtilities.invokeLater(this::setPopupMenuOnStart);
+            NotificationFactory.showNotification("Timer", "Here", 1000);
         }
         return true;
     }
@@ -278,12 +286,6 @@ public class Main extends Application {
 
     private void addTrayIcon() {
         trayIcon = new TrayIcon(image);
-        trayIcon.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent e) {
-                if (stage.isShowing()) popupMenu.remove(prefItem);
-            }
-        });
         popupMenu = new PopupMenu();
         popupMenu.add(startItem);
         popupMenu.add(prefItem);
@@ -319,14 +321,15 @@ public class Main extends Application {
     }
 
     private Pane paneSetUp() {
-        pane = new FlowGridPane(3, 2, sliderWorkTimeTile, sliderRestTimeTile, plusMinusCyclesTile, startTile);
+        pane = new FlowGridPane(3, 2,
+                sliderWorkTimeTile, sliderRestTimeTile, plusMinusCyclesTile, startTile);
         pane.setBackground(new Background(new BackgroundFill(Color.web("#101214"), CornerRadii.EMPTY, Insets.EMPTY)));
         pane.setColumnSpan(startTile, 3);
         pane.setHgap(5);
         pane.setVgap(5);
         pane.setCenterShape(true);
         pane.setAlignment(Pos.CENTER);
-        pane.setPadding(new javafx.geometry.Insets(5));
+        pane.setPadding(new Insets(5));
         return pane;
     }
 
