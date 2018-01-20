@@ -50,7 +50,7 @@ public class Main extends Application {
     private Integer cycles;
 
     // Icon
-    private final Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/Icon-16.png"));
+    private final Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/st.png"));
     private PopupMenu popupMenu;
     private MenuItem startItem;
     private MenuItem stopItem;
@@ -298,7 +298,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        Platform.setImplicitExit(false);
+//        System.setProperty("apple.awt.UIElement", "true");
         SwingUtilities.invokeLater(this::addTrayIcon);
         primaryStage.setScene(new Scene(paneSetUp()));
         primaryStage.setTitle("Timer");
@@ -306,9 +306,11 @@ public class Main extends Application {
         primaryStage.setOnCloseRequest(this::onClose);
 //        primaryStage.show();
         stage = primaryStage;
+        Platform.setImplicitExit(false);
     }
 
     private void addTrayIcon() {
+        java.awt.Toolkit.getDefaultToolkit();
         trayIcon = new TrayIcon(image);
         popupMenu = new PopupMenu();
         popupMenu.add(startItem);

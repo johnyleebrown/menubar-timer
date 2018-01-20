@@ -5,11 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.grigorii.menubartimer</groupId>
     <artifactId>menubartimer</artifactId>
-    <version>0.0.1</version>
-    <name>Menu bar timer for macOS</name>
+    <version>0.1</version>
+    <name>Timer</name>
+    <description>Menu bar timer for macOS</description>
 
     <properties>
         <main.class>me.grigorii.menubartimer.Main</main.class>
+        <identifier>me.grigorii.menubartimer</identifier>
     </properties>
 
     <dependencies>
@@ -73,7 +75,70 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <taskdef name="bundleapp"
+                                         classname="com.oracle.appbundler.AppBundlerTask">
+                                    <classpath>
+                                        <pathelement location="src/main/resources/appbundler-1.0.jar" />
+                                    </classpath>
+                                </taskdef>
+                                <delete failonerror="false" includeemptydirs="true" quiet="true">
+                                    <fileset dir="release/Timer.app" />
+                                </delete>
+                                <bundleapp outputdirectory="release"
+                                           name="Timer"
+                                           displayname="Timer"
+                                           identifier="${identifier}"
+                                           shortversion="${project.version}"
+                                           applicationCategory="public.app-category.productivity"
+                                           icon="src/main/resources/icon.icns"
+                                           mainclassname="${main.class}">
+                                    <classpath file="target/menubartimer-0.1-jar-with-dependencies.jar" />
+                                    <runtime dir="${env.JAVA_HOME}" />
+                                    <librarypath dir="src/main/resources/darwin" includes="*.dylib" />
+                                    <option value="-Djna.library.path=$APP_ROOT/Contents/MacOS" />
+                                    <!-- Hide dock icon -->
+                                    <option value="-Dglass.taskbarApplication=false"/>
+                                    <option value="-Xdock:icon=Contents/Resources/icon.icns" />
+                                    <option value="-Djavafx.macosx.embeded=true"/>
+                                    <option value="-Xms96m" />
+                                    <option value="-Xmx384m" />
+                                </bundleapp>
+                                <xslt in="release/Timer.app/Contents/Info.plist"
+                                      out="release/Timer.app/Contents/Info-updated.plist"
+                                      style="src/main/resources/scripts/build-osx-plist.xslt" />
+                                <delete file="release/Timer.app/Contents/Info.plist" />
+                                <move file="release/Timer.app/Contents/Info-updated.plist"
+                                      tofile="release/Timer.app/Contents/Info.plist" />
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>commons-net</groupId>
+                        <artifactId>commons-net</artifactId>
+                        <version>1.4.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.apache.ant</groupId>
+                        <artifactId>ant-commons-net</artifactId>
+                        <version>1.8.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
-
 </project>
