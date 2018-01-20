@@ -1,6 +1,8 @@
 package me.grigorii.menubartimer;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -57,5 +59,11 @@ public class Helper {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         final String strDate = simpleDateFormat.format(calendar.getTime());
         System.out.println(strDate);
+    }
+
+    public static String getTimeMinus(int minutes) {
+        LocalDateTime now = LocalDateTime.now().minusMinutes(minutes);
+        String formatDateTime = now.format(DateTimeFormatter.ofPattern("HH:mm"));
+        return formatDateTime;
     }
 }

@@ -11,6 +11,7 @@ import eu.hansolo.tilesfx.fonts.Fonts;
 import eu.hansolo.tilesfx.tools.FlowGridPane;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -58,9 +59,15 @@ public class Main extends Application {
     private MenuItem exitItem;
     private MenuItem prefItem;
 
+    // Strings
+    private final String MSG_TITLE_FINISHED = "Timer is up!";
+    private final String MSG_SUBTITLE_FINISHED = "Elapsed time: ";
+    private final String MSG_MESSAGE_FINISHED = "Started at ";
+
     @Override
     public void init() {
         // Create tiles
+        //// Work tile
         sliderWorkTimeTile = TileBuilder.create()
                 .skinType(Tile.SkinType.SLIDER)
                 .prefSize(170, 170)
@@ -75,6 +82,7 @@ public class Main extends Application {
 
         workMinutes = (int) Math.round(sliderWorkTimeTile.getValue());
 
+        //// Rest tile
         sliderRestTimeTile = TileBuilder.create()
                 .skinType(Tile.SkinType.SLIDER)
                 .prefSize(170, 170)
@@ -83,12 +91,13 @@ public class Main extends Application {
                 .decimals(0)
                 .minValue(0)
                 .maxValue(60)
-                .value(0)
+                .value(1)
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
         restMinutes = (int) Math.round(sliderRestTimeTile.getValue());
 
+        //// Cycles tile
         plusMinusCyclesTile = TileBuilder.create()
                 .skinType(Tile.SkinType.PLUS_MINUS)
                 .prefSize(170, 170)
@@ -100,6 +109,7 @@ public class Main extends Application {
 
         cycles = (int) plusMinusCyclesTile.getValue();
 
+        //// Start button tile
         Text startText = new Text("Start");
         startText.setFont(Fonts.latoRegular(24));
 
@@ -111,6 +121,7 @@ public class Main extends Application {
                 .graphic(startText)
                 .build();
 
+        //// Pause button tile
         Text pauseText = new Text("Pause");
         pauseText.setFont(Fonts.latoRegular(24));
 
@@ -122,6 +133,7 @@ public class Main extends Application {
                 .graphic(pauseText)
                 .build();
 
+        //// Resume button tile
         Text resumeText = new Text("Resume");
         resumeText.setFont(Fonts.latoRegular(24));
 
@@ -133,6 +145,7 @@ public class Main extends Application {
                 .graphic(resumeText)
                 .build();
 
+        //// Stop button tile
         Text stopText = new Text("Stop");
         stopText.setFont(Fonts.latoRegular(24));
 
@@ -212,34 +225,45 @@ public class Main extends Application {
     }
 
     private boolean actionOnStart() {
-        if (((workMinutes == null || workMinutes == 0)
-                && (restMinutes == null || restMinutes == 0)) || cycles == null || cycles == 0) return false;
+        if (((workMinutes == null || workMinutes == 0) && (restMinutes == null || restMinutes == 0))
+                || cycles == null || cycles == 0) return false;
         if (!isRunning) {
-            disableTiles(true);
             isRunning = true;
-
-            pane.getChildren().remove(startTile);
-            pane.add(pauseTile, 0, 1);
-            pane.add(stopTile, 1, 1);
-            pane.setColumnSpan(stopTile, 2);
-
-            FxTimer.getInstance().setTimer(getTotalTime(), getCycles());
-            FxTimer.getInstance().setOnFinished(event2 -> {
-                if (isRunning) {
-                    System.out.println("The timer finished");
-                    disableTiles(false);
-                    isRunning = false;
-                    pane.getChildren().remove(3, 5);
-                    pane.add(startTile, 0, 1);
-                    pane.setColumnSpan(startTile, 3);
-                    SwingUtilities.invokeLater(this::setPopupMenuOnStop);
-                }
-            });
+            onStartTiles();
+            FxTimer.getInstance().setTimer(getWorkTime(), getRestTime(), getCycles());
+            FxTimer.getInstance().setOnFinished(this::onFinishedTimer);
             FxTimer.getInstance().startTimer();
             SwingUtilities.invokeLater(this::setPopupMenuOnStart);
-            NotificationFactory.showNotification("Timer", "Here", 1000);
         }
         return true;
+    }
+
+    private void onStartTiles() {
+        disableTiles(true);
+        pane.getChildren().remove(startTile);
+        pane.add(pauseTile, 0, 1);
+        pane.add(stopTile, 1, 1);
+        pane.setColumnSpan(stopTile, 2);
+    }
+
+    private void onFinishedTimer(ActionEvent actionEvent) {
+        if (isRunning) {
+            System.out.println("The timer is finished");
+            disableTiles(false);
+            isRunning = false;
+            pane.getChildren().remove(3, 5);
+            pane.add(startTile, 0, 1);
+            pane.setColumnSpan(startTile, 3);
+            SwingUtilities.invokeLater(this::setPopupMenuOnStop);
+            sendNotification(workMinutes * cycles + restMinutes * (cycles - 1));
+        }
+    }
+
+    private void sendNotification(int total) {
+        String subtitle_base = MSG_SUBTITLE_FINISHED + total + " minute";
+        String subtitle = total == 1 ? subtitle_base : subtitle_base + "s";
+        String message = MSG_MESSAGE_FINISHED + Helper.getTimeMinus(total);
+        NotificationFactory.showNotification("Timer", MSG_TITLE_FINISHED, subtitle, 1500);
     }
 
     private void actionOnStop() {
@@ -280,7 +304,7 @@ public class Main extends Application {
         primaryStage.setTitle("Timer");
         primaryStage.setResizable(false);
         primaryStage.setOnCloseRequest(this::onClose);
-        primaryStage.show();
+//        primaryStage.show();
         stage = primaryStage;
     }
 
@@ -321,8 +345,7 @@ public class Main extends Application {
     }
 
     private Pane paneSetUp() {
-        pane = new FlowGridPane(3, 2,
-                sliderWorkTimeTile, sliderRestTimeTile, plusMinusCyclesTile, startTile);
+        pane = new FlowGridPane(3, 2, sliderWorkTimeTile, sliderRestTimeTile, plusMinusCyclesTile, startTile);
         pane.setBackground(new Background(new BackgroundFill(Color.web("#101214"), CornerRadii.EMPTY, Insets.EMPTY)));
         pane.setColumnSpan(startTile, 3);
         pane.setHgap(5);
@@ -353,10 +376,12 @@ public class Main extends Application {
         plusMinusCyclesTile.setDisable(value);
     }
 
-    private int getTotalTime() {
-        int work = workMinutes == null ? (int) Math.round(sliderWorkTimeTile.getValue()) : workMinutes;
-        int rest = restMinutes == null ? (int) Math.round(sliderRestTimeTile.getValue()) : restMinutes;
-        return work + rest;
+    private int getWorkTime() {
+        return workMinutes == null ? (int) Math.round(sliderWorkTimeTile.getValue()) : workMinutes;
+    }
+
+    private int getRestTime() {
+        return restMinutes == null ? (int) Math.round(sliderRestTimeTile.getValue()) : restMinutes;
     }
 
     private int getCycles() {

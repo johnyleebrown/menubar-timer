@@ -18,6 +18,9 @@ public class Notification implements BasicNotification<NSUserNotification> {
 	}
 
 	@Override
+	public void setSubtitle(String subtitle) { notification.setSubtitle(subtitle); }
+
+	@Override
 	public void setDefaultSoundName() { notification.setDefaultSoundName(); }
 
 	@Override
@@ -46,16 +49,14 @@ public class Notification implements BasicNotification<NSUserNotification> {
 
 	@Override
 	public void show(long duration, TimeUnit unit) {
-		Platform.runLater(() -> {
-			try {
-				NSUserNotificationCenter.getInstance().deliverNotification(notification);
-				Thread.sleep(unit.toMillis(duration));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			} finally {
-				notification.close();
-			}
-		});
+		try {
+			NSUserNotificationCenter.getInstance().deliverNotification(notification);
+			Thread.sleep(unit.toMillis(duration));
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} finally {
+			notification.close();
+		}
 	}
 
 	@Override

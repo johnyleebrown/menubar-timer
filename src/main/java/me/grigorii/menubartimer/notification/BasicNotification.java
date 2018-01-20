@@ -7,21 +7,23 @@ import java.util.concurrent.TimeUnit;
  */
 public interface BasicNotification<T> {
 
-	String getTitle();
-
 	void setTitle(String title);
 
-	String getMessage();
+	String getTitle();
 
 	void setMessage(String message);
 
-	void show(long duration, TimeUnit unit);
+	String getMessage();
 
-	void setDefaultSoundName();
+	void setSubtitle(String subtitle);
 
 	void setSoundName(String name);
 
+	void setDefaultSoundName();
+
 	void enableActionButton();
+
+	void show(long duration, TimeUnit unit);
 
 	T getRoot();
 }
