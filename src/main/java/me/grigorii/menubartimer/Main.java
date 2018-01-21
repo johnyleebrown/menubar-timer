@@ -265,7 +265,7 @@ public class Main extends Application {
         FileInputStream in = null;
         int[] pref = new int[3];
         try {
-            in = new FileInputStream("pref.xml");
+            in = new FileInputStream(".TimerSettings.xml");
             XMLDecoder decoder = new XMLDecoder(in);
             pref = (int[]) decoder.readObject();
             decoder.close();
@@ -494,7 +494,7 @@ public class Main extends Application {
         int[] pref = new int[]{work, rest, cycles};
         FileOutputStream out = null;
         try {
-            out = new FileOutputStream("pref.xml");
+            out = new FileOutputStream(".TimerSettings.xml");
             XMLEncoder encoder = new XMLEncoder(out);
             encoder.writeObject(pref);
             encoder.close();
@@ -516,6 +516,10 @@ public class Main extends Application {
         return formatDateTime;
     }
 
+    /**
+     * The application will remain running
+     * until the user selects the Exit menu option from the tray icon.
+     */
     public static void main(String[] args) {
         launch(args);
     }
