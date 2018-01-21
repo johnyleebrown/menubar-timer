@@ -1,6 +1,9 @@
 package me.grigorii.menubartimer;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.awt.*;
+import java.io.IOException;
 
 import javax.swing.*;
 
@@ -67,7 +70,6 @@ public class Main extends Application {
     private Integer cycles;
 
     // Icon
-    private final Image image = Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/icons/Icon_16x16@3x.png"));
     private PopupMenu popupMenu;
     private MenuItem startItem;
     private MenuItem stopItem;
@@ -80,6 +82,8 @@ public class Main extends Application {
     private final String MSG_TITLE_FINISHED = "Timer is up!";
     private final String MSG_SUBTITLE_FINISHED = "Elapsed time: ";
     private final String MSG_MESSAGE_FINISHED = "Started at ";
+    private final String PATH_LIGHT_MODE_ICON = "/icons/icon_16x16@3x.png";
+    private final String PATH_DARK_MODE_ICON = "/icons/icon_16x16@3x_dm.png";
 
     @Override
     public void init() {
@@ -328,7 +332,7 @@ public class Main extends Application {
 
     private void addTrayIcon() {
         java.awt.Toolkit.getDefaultToolkit();
-        trayIcon = new TrayIcon(image);
+        trayIcon = new TrayIcon(getTrayIconImage());
         popupMenu = new PopupMenu();
         popupMenu.add(startItem);
         popupMenu.add(prefItem);
@@ -338,6 +342,22 @@ public class Main extends Application {
             SystemTray.getSystemTray().add(trayIcon);
         } catch (AWTException e) {
             e.printStackTrace();
+        }
+    }
+
+    private Image getTrayIconImage() {
+        String path = isMacMenuBarDarkMode() ? PATH_DARK_MODE_ICON : PATH_LIGHT_MODE_ICON ;
+        return Toolkit.getDefaultToolkit().getImage(Main.class.getResource(path));
+    }
+
+    private static boolean isMacMenuBarDarkMode() {
+        try {
+            final Process proc = Runtime.getRuntime().exec(new String[] {"defaults", "read", "-g", "AppleInterfaceStyle"});
+            proc.waitFor(100, MILLISECONDS);
+            return proc.exitValue() == 0;
+        } catch (IOException | InterruptedException | IllegalThreadStateException ex) {
+            System.err.println("Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode.");
+            return false;
         }
     }
 
