@@ -3,7 +3,15 @@ package me.grigorii.menubartimer;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import java.awt.*;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.*;
 
@@ -79,14 +87,20 @@ public class Main extends Application {
     private MenuItem prefItem;
 
     // Strings
-    private final String MSG_TITLE_FINISHED = "Timer is up!";
-    private final String MSG_SUBTITLE_FINISHED = "Elapsed time: ";
-    private final String MSG_MESSAGE_FINISHED = "Started at ";
-    private final String PATH_LIGHT_MODE_ICON = "/icons/icon_16x16@3x.png";
-    private final String PATH_DARK_MODE_ICON = "/icons/icon_16x16@3x_dm.png";
+    private final String PATH_LIGHT_MODE_ICON = "icons/i16x16@3x.png";
+    private final String PATH_DARK_MODE_ICON = "icons/i16x16@3x_dm.png";
+
+    // Preferences struct
+    private int[] storedPref;
 
     @Override
     public void init() {
+        // Retrieving stored preferences
+        storedPref = getPref();
+        int workTimerFromXML = (storedPref[0] == 0) ? 1 : storedPref[0];
+        int restTimerFromXML = (storedPref[1] == 0) ? 1 : storedPref[1];
+        int cyclesFromXML = (storedPref[2] == 0) ? 1 : storedPref[2];
+
         // Create tiles
         //// Work tile
         sliderWorkTimeTile = TileBuilder.create()
@@ -97,7 +111,7 @@ public class Main extends Application {
                 .decimals(0)
                 .minValue(0)
                 .maxValue(130)
-                .value(1)
+                .value(workTimerFromXML)
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
@@ -112,7 +126,7 @@ public class Main extends Application {
                 .decimals(0)
                 .minValue(0)
                 .maxValue(60)
-                .value(1)
+                .value(restTimerFromXML)
                 .barBackgroundColor(Tile.FOREGROUND)
                 .build();
 
@@ -123,8 +137,9 @@ public class Main extends Application {
                 .skinType(Tile.SkinType.PLUS_MINUS)
                 .prefSize(170, 170)
                 .decimals(0)
-                .maxValue(30)
                 .minValue(0)
+                .maxValue(100)
+                .value(cyclesFromXML)
                 .description("Cycles")
                 .build();
 
@@ -245,6 +260,31 @@ public class Main extends Application {
         }));
     }
 
+    /**
+     * Getting preferences obj from xml
+     */
+    private int[] getPref() {
+        FileInputStream in = null;
+        int[] pref = new int[3];
+        try {
+            in = new FileInputStream("pref.xml");
+            XMLDecoder decoder = new XMLDecoder(in);
+            pref = (int[]) decoder.readObject();
+            decoder.close();
+        } catch (FileNotFoundException e) {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        } finally {
+            return pref;
+        }
+    }
+
     private boolean actionOnStart() {
         if (((workMinutes == null || workMinutes == 0) && (restMinutes == null || restMinutes == 0))
                 || cycles == null || cycles == 0) return false;
@@ -281,10 +321,11 @@ public class Main extends Application {
     }
 
     private void sendNotification(int total) {
-        String subtitle_base = MSG_SUBTITLE_FINISHED + total + " minute";
-        String subtitle = total == 1 ? subtitle_base : subtitle_base + "s";
-        String message = MSG_MESSAGE_FINISHED + Helper.getTimeMinus(total);
-        NotificationFactory.showNotification("Timer", MSG_TITLE_FINISHED, subtitle, 1500);
+        String MSG_TITLE_FINISHED = "Timer is up!";
+        String subtitle_base = "Elapsed time: " + total + " minute";
+        String MSG_SUBTITLE_FINISHED = total == 1 ? subtitle_base : subtitle_base + "s";
+        String MSG_MESSAGE_FINISHED = "Started at " + getTimeMinus(total);
+        NotificationFactory.showNotification("Timer", MSG_TITLE_FINISHED, MSG_SUBTITLE_FINISHED, 1500);
     }
 
     private void actionOnStop() {
@@ -325,14 +366,16 @@ public class Main extends Application {
         primaryStage.setTitle("Timer");
         primaryStage.setResizable(false);
         primaryStage.setOnCloseRequest(this::onClose);
-//        primaryStage.show();
+        if (storedPref[0] == 0) primaryStage.show();
         stage = primaryStage;
         Platform.setImplicitExit(false);
     }
 
     private void addTrayIcon() {
         java.awt.Toolkit.getDefaultToolkit();
-        trayIcon = new TrayIcon(getTrayIconImage());
+        Image m = getTrayIconImage();
+        if (m == null) System.out.println("m == null");
+        trayIcon = new TrayIcon(m);
         popupMenu = new PopupMenu();
         popupMenu.add(startItem);
         popupMenu.add(prefItem);
@@ -346,8 +389,20 @@ public class Main extends Application {
     }
 
     private Image getTrayIconImage() {
-        String path = isMacMenuBarDarkMode() ? PATH_DARK_MODE_ICON : PATH_LIGHT_MODE_ICON ;
-        return Toolkit.getDefaultToolkit().getImage(Main.class.getResource(path));
+        String path = isMacMenuBarDarkMode() ? PATH_DARK_MODE_ICON : PATH_LIGHT_MODE_ICON;
+        if (Main.class.getResource("/" + path) == null) {
+            URL url = getClass().getResource("");
+            if (url != null && url.toString().startsWith("jar:")) {
+                String s = url.toExternalForm() + path;
+                System.out.println(s);
+                Image img = Toolkit.getDefaultToolkit().getImage(s);
+                if (img == null) System.out.println("img is null");
+                return img;
+            }
+        } else {
+            return Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/" + path));
+        }
+        return null;
     }
 
     private static boolean isMacMenuBarDarkMode() {
@@ -356,7 +411,7 @@ public class Main extends Application {
             proc.waitFor(100, MILLISECONDS);
             return proc.exitValue() == 0;
         } catch (IOException | InterruptedException | IllegalThreadStateException ex) {
-            System.err.println("Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode.");
+            System.out.println("Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode.");
             return false;
         }
     }
@@ -425,6 +480,43 @@ public class Main extends Application {
 
     private int getCycles() {
         return cycles == null ? (int) plusMinusCyclesTile.getValue() : cycles;
+    }
+
+    @Override
+    public void stop() {
+        savePref();
+    }
+
+    /**
+     * Saving preferences obj to xml
+     */
+    private void savePref() {
+        int work = (int) Math.round(sliderWorkTimeTile.getValue());
+        int rest = (int) Math.round(sliderRestTimeTile.getValue());
+        int cycles = (int) plusMinusCyclesTile.getValue();
+        int[] pref = new int[]{work, rest, cycles};
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream("pref.xml");
+            XMLEncoder encoder = new XMLEncoder(out);
+            encoder.writeObject(pref);
+            encoder.close();
+        } catch (Exception e) {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            e.printStackTrace();
+        }
+    }
+
+    public static String getTimeMinus(int minutes) {
+        LocalDateTime now = LocalDateTime.now().minusMinutes(minutes);
+        String formatDateTime = now.format(DateTimeFormatter.ofPattern("HH:mm"));
+        return formatDateTime;
     }
 
     public static void main(String[] args) {

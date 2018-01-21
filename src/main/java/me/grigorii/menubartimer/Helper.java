@@ -66,6 +66,7 @@ public class Helper {
         return workTime;
     }
 
+    @Deprecated
     private static void setWorkTime(int[] workTime, int h, int t, int o) {
         workTime[0] = h;
         workTime[1] = t;
@@ -78,11 +79,5 @@ public class Helper {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         final String strDate = simpleDateFormat.format(calendar.getTime());
         System.out.println(strDate);
-    }
-
-    public static String getTimeMinus(int minutes) {
-        LocalDateTime now = LocalDateTime.now().minusMinutes(minutes);
-        String formatDateTime = now.format(DateTimeFormatter.ofPattern("HH:mm"));
-        return formatDateTime;
     }
 }
