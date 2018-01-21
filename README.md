@@ -1,3 +1,9 @@
+<p align="center">
+  <img width="130" alt="icon" src="https://user-images.githubusercontent.com/10441153/35138331-13241b4a-fcff-11e7-89f0-0a57258821dc.png">
+<p>
+
+
+
 | Menu bar Timer | 
 | :------------: |
 | (tested on OS X El Capitan) | 
