@@ -25,6 +25,7 @@ import com.sun.jna.Pointer;
  *
  */
 public interface NSUserNotificationCenterCInterface extends Library {
+
 	void NSUserNotificationCenterScheduleNotification(Pointer paramPointer);
 
 	int NSUserNotificationCenterGetDeliveredNotificationsCount();

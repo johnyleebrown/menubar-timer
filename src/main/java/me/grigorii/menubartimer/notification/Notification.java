@@ -2,7 +2,6 @@ package me.grigorii.menubartimer.notification;
 
 import java.util.concurrent.TimeUnit;
 
-import javafx.application.Platform;
 import me.grigorii.menubartimer.notification.core.NSUserNotification;
 import me.grigorii.menubartimer.notification.core.NSUserNotificationCenter;
 

@@ -24,6 +24,7 @@ import com.sun.jna.Pointer;
  *
  */
 public interface NSUserNotificationCInterface extends Library {
+
 	Pointer NSUserNotificationAllocInit();
 
 	void NSUserNotificationSetTitle(Pointer paramPointer1, Pointer paramPointer2);

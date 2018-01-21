@@ -15,6 +15,8 @@ import java.time.format.DateTimeFormatter;
 
 import javax.swing.*;
 
+import org.apache.log4j.Logger;
+
 import eu.hansolo.tilesfx.Tile;
 import eu.hansolo.tilesfx.TileBuilder;
 import eu.hansolo.tilesfx.events.TileEvent;
@@ -58,6 +60,8 @@ import me.grigorii.menubartimer.notification.NotificationFactory;
  *
  */
 public class Main extends Application {
+
+    final static Logger logger = Logger.getLogger(Main.class);
 
     // Nodes
     private Stage stage;
@@ -223,39 +227,33 @@ public class Main extends Application {
         // Tray icon items
         pauseItem = new MenuItem("Pause");
         pauseItem.addActionListener(event -> {
-            System.out.println("Pause from menu bar");
             Platform.runLater(this::actionOnPause);
         });
 
         resumeItem = new MenuItem("Resume");
         resumeItem.addActionListener(event -> {
-            System.out.println("Resume from menu bar");
             Platform.runLater(this::actionOnResume);
         });
 
         stopItem = new MenuItem("Stop");
         stopItem.addActionListener(event -> {
-            System.out.println("Stop from menu bar");
             Platform.runLater(this::actionOnStop);
         });
 
         prefItem = new MenuItem("Preferences");
         prefItem.addActionListener(event -> Platform.runLater(() -> {
-            System.out.println("Preferences from menu bar");
             popupMenu.remove(prefItem);
             showPrimaryStage();
         }));
 
         exitItem = new MenuItem("Quit");
         exitItem.addActionListener(event -> {
-            System.out.println("Quit from menu bar");
             Platform.exit();
             SystemTray.getSystemTray().remove(trayIcon);
         });
 
         startItem = new MenuItem("Start");
         startItem.addActionListener(event -> Platform.runLater(() -> {
-            System.out.println("Start from menu bar");
             actionOnStart();
         }));
     }
@@ -309,7 +307,6 @@ public class Main extends Application {
 
     private void onFinishedTimer(ActionEvent actionEvent) {
         if (isRunning) {
-            System.out.println("The timer is finished");
             disableTiles(false);
             isRunning = false;
             pane.getChildren().remove(3, 5);
@@ -373,9 +370,12 @@ public class Main extends Application {
 
     private void addTrayIcon() {
         java.awt.Toolkit.getDefaultToolkit();
-        Image m = getTrayIconImage();
-        if (m == null) System.out.println("m == null");
-        trayIcon = new TrayIcon(m);
+        Image img = getTrayIconImage();
+        if (img == null) {
+            logger.error("Icon doesn't exist");
+            Platform.exit();
+        }
+        trayIcon = new TrayIcon(img);
         popupMenu = new PopupMenu();
         popupMenu.add(startItem);
         popupMenu.add(prefItem);
@@ -394,10 +394,7 @@ public class Main extends Application {
             URL url = getClass().getResource("");
             if (url != null && url.toString().startsWith("jar:")) {
                 String s = url.toExternalForm() + path;
-                System.out.println(s);
-                Image img = Toolkit.getDefaultToolkit().getImage(s);
-                if (img == null) System.out.println("img is null");
-                return img;
+                return Toolkit.getDefaultToolkit().getImage(s);
             }
         } else {
             return Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/" + path));
@@ -411,7 +408,7 @@ public class Main extends Application {
             proc.waitFor(100, MILLISECONDS);
             return proc.exitValue() == 0;
         } catch (IOException | InterruptedException | IllegalThreadStateException ex) {
-            System.out.println("Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode.");
+            logger.error("Could not determine, whether 'dark mode' is being used. Falling back to default (light) mode.");
             return false;
         }
     }

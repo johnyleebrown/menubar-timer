@@ -1,5 +1,7 @@
 package me.grigorii.menubartimer;
 
+import org.apache.log4j.Logger;
+
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -30,6 +32,7 @@ import me.grigorii.menubartimer.notification.NotificationFactory;
  */
 public class FxTimer {
 
+    final static Logger logger = Logger.getLogger(FxTimer.class);
     private Timeline workTimeline;
     private Timeline lastTimeline;
     private Timeline restTimeline;
@@ -60,52 +63,44 @@ public class FxTimer {
         restTimeline.setOnFinished(this::onFinishedRestTimeline);
 
         lastTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime)));
-        lastTimeline.setOnFinished(event -> System.out.println("work finished completely"));
+        lastTimeline.setOnFinished(event -> logger.debug("Timer is finished"));
     }
 
     private void onFinishedWorkTimeline(ActionEvent actionEvent) {
         workTimeline.pause();
-        System.out.println(workTimeline.getCurrentTime());
-        System.out.println("work is done");
+        logger.debug("Work is done " + workTimeline.getCurrentTime());
         NotificationFactory.showNotification("Timer", "Time to take a break!", "", 1000);
         onStartRestTimeline();
     }
 
     private void onFinishedRestTimeline(ActionEvent actionEvent) {
-        System.out.println("rest is done");
+        logger.debug("Rest is done");
         workTimeline.play();
         NotificationFactory.showNotification("Timer", "It's time to work!", "", 1000);
-        System.out.println("continuing");
+        logger.debug("Continuing work");
     }
 
     private void onStartLastTimeline(ActionEvent actionEvent) {
         lastTimeline.play();
-        System.out.println("last round has started");
+        logger.debug("The last round has started");
     }
 
     private void onStartRestTimeline() {
         restTimeline.play();
-        System.out.println("rest started");
+        logger.debug("The rest has started");
     }
 
     public void startTimer() {
-        if (cycles == 1) {
-            lastTimeline.play();
-            System.out.println(lastTimeline.getTotalDuration().toMinutes());
-        }
-        else {
-            workTimeline.play();
-            System.out.println(workTimeline.getTotalDuration().toMinutes());
-        }
-        System.out.println("The timer started");
+        if (cycles == 1) lastTimeline.play();
+        else workTimeline.play();
+        logger.debug("The timer started");
     }
 
     public void pauseTimer() {
         Timeline t = getRunningTimeline();
         if (t == null) return;
         t.pause();
-        System.out.println("The timer paused");
-        System.out.println(t.getCurrentTime().toMinutes());
+        logger.debug("The timer paused " + t.getCurrentTime().toMinutes());
     }
 
     private Timeline getRunningTimeline() {
@@ -118,7 +113,7 @@ public class FxTimer {
     public void resumeTimer() {
         Timeline t = getPausedTimeline();
         t.play();
-        System.out.println("The timer resumed");
+        logger.debug("The timer resumed");
     }
 
     private Timeline getPausedTimeline() {
@@ -129,8 +124,7 @@ public class FxTimer {
 
     public void stopTimer() {
         workTimeline.stop();
-        System.out.println("The timer stopped");
-        System.out.println(workTimeline.getCurrentTime().toMinutes());
+        logger.debug("The timer stopped " + workTimeline.getCurrentTime().toMinutes());
     }
 
     public void setOnFinished(EventHandler<ActionEvent> eventHandler) {

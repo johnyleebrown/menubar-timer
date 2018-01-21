@@ -25,6 +25,11 @@
             <artifactId>jna</artifactId>
             <version>4.5.1</version>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,7 +108,7 @@
                                            icon="src/main/resources/icons/icon.icns"
                                            mainclassname="${main.class}">
                                     <classpath file="target/menubartimer-0.1-jar-with-dependencies.jar" />
-                                    <runtime dir="${env.JAVA_HOME}" />
+                                    <!--<runtime dir="${env.JAVA_HOME}" />-->
                                     <librarypath dir="src/main/resources/darwin" includes="*.dylib" />
                                     <option value="-Djna.library.path=$APP_ROOT/Contents/MacOS" />
                                     <!-- Hide dock icon -->

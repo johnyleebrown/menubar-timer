@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -35,6 +37,7 @@ import me.grigorii.menubartimer.notification.libraries.NSUserNotificationCInterf
  */
 public class NSUserNotification {
 
+	final static Logger logger = Logger.getLogger(NSUserNotification.class);
 	private static NSUserNotificationCInterface library = null;
 	private Pointer notification;
 
@@ -69,7 +72,7 @@ public class NSUserNotification {
 			try {
 				returnBytes = input.getBytes(charSet);
 			} catch (UnsupportedEncodingException e) {
-				System.out.println(": Data error:" + e.getMessage());
+				logger.debug(": Data error:" + e.getMessage());
 			}
 		}
 		return returnBytes;
@@ -85,7 +88,7 @@ public class NSUserNotification {
 			try {
 				returnString = new String(input, 0, input.length, charSet);
 			} catch (UnsupportedEncodingException e) {
-				System.out.println("Data error:" + e.getMessage());
+				logger.debug("Data error:" + e.getMessage());
 			}
 		}
 		return returnString;

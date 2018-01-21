@@ -2,6 +2,8 @@ package me.grigorii.menubartimer.notification.core;
 
 import java.util.ArrayList;
 
+import org.apache.log4j.Logger;
+
 import com.sun.jna.Callback;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
@@ -29,22 +31,27 @@ import me.grigorii.menubartimer.notification.libraries.NSUserNotificationCenterD
  *
  */
 public class NSUserNotificationCenter {
+
+	final static Logger logger = Logger.getLogger(NSUserNotification.class);
 	private static NSUserNotificationCenterCInterface library = null;
 	private static NSUserNotificationCenter instance = null;
+
 	private static Callback defaultActivateCallback = new Callback() {
 		public void callback(Pointer n) {
-		System.out.println("No delegate defined. Activate.");
+			logger.debug("ActivateCallback. No delegate defined.");
 		}
 	};
+
 	private static Callback defaultDeliverCallback = new Callback() {
 		public void callback(Pointer n) {
-		System.out.println("No delegate defined. Deliver.");
+			logger.debug("DeliverCallback. No delegate defined.");
 		}
 	};
+
 	private static Callback defaultPresentCallback = new Callback() {
 		public byte callback(Pointer n) {
-		System.out.println("No delegate defined. Present.");
-		return 1;
+			logger.debug("PresentCallback. No delegate defined.");
+			return 1;
 		}
 	};
 
@@ -132,5 +139,4 @@ public class NSUserNotificationCenter {
 		}
 		library.NSUserNotificationCenterSetDelegate(activate, deliver, present);
 	}
-
 }
