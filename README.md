@@ -1,4 +1,4 @@
-<h1 align="center">Menu bar Timer for OS X</h1>
+<h1 align="center">Menu bar Timer</h1>
 <p align="center">
   <img title="Latest Release" src="https://img.shields.io/badge/release-v0.1-green.svg" width="75"><br>
   <a href="https://github.com/johnyleebrown/menubar-timer/releases">Download the latest release</a>
@@ -18,6 +18,7 @@
 - Drag the .app into the Applications folder
 - If "Can't be opened because it is from an unidentified developer" - disable gatekeeper with `sudo spctl --master-disable` or from preferences, or you can `sudo spctl --add Timer.app` to add to exceptions
 - To make it open on the start up - go to the Preferences -> User & Groups -> Login items -> add app
+- Also works on Win 10 (no notifications or .exe yet)
 
 ### Motivation: 
 Rival apps occasionally lag or show ads or have inconvenient ui.

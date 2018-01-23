@@ -359,13 +359,17 @@ public class Main extends Application {
     public void start(Stage primaryStage) {
 //        System.setProperty("apple.awt.UIElement", "true");
         SwingUtilities.invokeLater(this::addTrayIcon);
-        primaryStage.setScene(new Scene(paneSetUp()));
-        primaryStage.setTitle("Timer");
-        primaryStage.setResizable(false);
-        primaryStage.setOnCloseRequest(this::onClose);
-        if (storedPref[0] == 0) primaryStage.show();
         stage = primaryStage;
+        if (storedPref[0] == 0) setStage();
         Platform.setImplicitExit(false);
+    }
+
+    private void setStage() {
+        stage.setScene(new Scene(paneSetUp()));
+        stage.setTitle("Timer");
+        stage.setResizable(false);
+        stage.setOnCloseRequest(this::onClose);
+        stage.show();
     }
 
     private void addTrayIcon() {
@@ -458,6 +462,7 @@ public class Main extends Application {
         if (stage != null) {
             stage.show();
             stage.toFront();
+            stage.requestFocus();
         }
     }
 

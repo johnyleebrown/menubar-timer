@@ -37,7 +37,7 @@ import me.grigorii.menubartimer.notification.libraries.NSUserNotificationCInterf
  */
 public class NSUserNotification {
 
-	final static Logger logger = Logger.getLogger(NSUserNotification.class);
+	private final static Logger logger = Logger.getLogger(NSUserNotification.class);
 	private static NSUserNotificationCInterface library = null;
 	private Pointer notification;
 
