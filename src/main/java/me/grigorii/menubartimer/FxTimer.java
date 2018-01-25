@@ -2,7 +2,6 @@ package me.grigorii.menubartimer;
 
 import org.apache.log4j.Logger;
 
-import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.event.ActionEvent;
@@ -35,12 +34,11 @@ public class FxTimer {
     final static Logger logger = Logger.getLogger(FxTimer.class);
     private Timeline workTimeline;
     private Timeline lastTimeline;
-    private Timeline restTimeline;
+    private Timeline currentTimeline;
     private int cycles;
 
     private FxTimer() {
         workTimeline = new Timeline();
-        restTimeline = new Timeline();
         lastTimeline = new Timeline();
     }
 
@@ -54,76 +52,46 @@ public class FxTimer {
 
     public void setTimer(int workTime, int restTime, int cycles) {
         this.cycles = cycles;
-
         workTimeline.setCycleCount(cycles - 1);
-        workTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime), this::onFinishedWorkTimeline));
+        workTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime), e -> {
+            NotificationFactory.showNotification("Time to take a break!");
+            logger.debug("Work is done");
+        }));
+        workTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime + restTime), e -> {
+            NotificationFactory.showNotification("It's time to work!");
+            logger.debug("Break is finished");
+        }));
         workTimeline.setOnFinished(this::onStartLastTimeline);
-
-        restTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(restTime)));
-        restTimeline.setOnFinished(this::onFinishedRestTimeline);
-
         lastTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime)));
-        lastTimeline.setOnFinished(event -> logger.debug("Timer is finished"));
-    }
-
-    private void onFinishedWorkTimeline(ActionEvent actionEvent) {
-        workTimeline.pause();
-        logger.debug("Work is done " + workTimeline.getCurrentTime());
-        NotificationFactory.showNotification("Timer", "Time to take a break!", "", 1000);
-        onStartRestTimeline();
-    }
-
-    private void onFinishedRestTimeline(ActionEvent actionEvent) {
-        logger.debug("Rest is done");
-        workTimeline.play();
-        NotificationFactory.showNotification("Timer", "It's time to work!", "", 1000);
-        logger.debug("Continuing work");
     }
 
     private void onStartLastTimeline(ActionEvent actionEvent) {
         lastTimeline.play();
+        currentTimeline = lastTimeline;
         logger.debug("The last round has started");
-    }
-
-    private void onStartRestTimeline() {
-        restTimeline.play();
-        logger.debug("The rest has started");
     }
 
     public void startTimer() {
         if (cycles == 1) lastTimeline.play();
-        else workTimeline.play();
+        else {
+            workTimeline.play();
+            currentTimeline = workTimeline;
+        }
         logger.debug("The timer started");
     }
 
     public void pauseTimer() {
-        Timeline t = getRunningTimeline();
-        if (t == null) return;
-        t.pause();
-        logger.debug("The timer paused " + t.getCurrentTime().toMinutes());
-    }
-
-    private Timeline getRunningTimeline() {
-        if (workTimeline.getStatus() == Animation.Status.RUNNING) return workTimeline;
-        else if (restTimeline.getStatus() == Animation.Status.RUNNING) return restTimeline;
-        else if (lastTimeline.getStatus() == Animation.Status.RUNNING) return lastTimeline;
-        return null;
+        currentTimeline.pause();
+        logger.debug("The timer paused " + currentTimeline.getCurrentTime().toMinutes());
     }
 
     public void resumeTimer() {
-        Timeline t = getPausedTimeline();
-        t.play();
+        currentTimeline.play();
         logger.debug("The timer resumed");
     }
 
-    private Timeline getPausedTimeline() {
-        if (restTimeline.getStatus() == Animation.Status.PAUSED) return restTimeline;
-        else if (workTimeline.getStatus() == Animation.Status.PAUSED) return workTimeline;
-        else return lastTimeline;
-    }
-
     public void stopTimer() {
-        workTimeline.stop();
+        currentTimeline.stop();
         logger.debug("The timer stopped " + workTimeline.getCurrentTime().toMinutes());
     }
 

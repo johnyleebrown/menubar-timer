@@ -1,6 +1,7 @@
 package me.grigorii.menubartimer;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static me.grigorii.menubartimer.Helper.printDate;
 
 import java.awt.*;
 import java.beans.XMLDecoder;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.swing.*;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 
 import eu.hansolo.tilesfx.Tile;
@@ -314,15 +316,16 @@ public class Main extends Application {
             pane.setColumnSpan(startTile, 3);
             SwingUtilities.invokeLater(this::setPopupMenuOnStop);
             sendNotification(workMinutes * cycles + restMinutes * (cycles - 1));
+            logger.debug(printDate());
         }
     }
 
     private void sendNotification(int total) {
-        String MSG_TITLE_FINISHED = "Timer is up!";
         String subtitle_base = "Elapsed time: " + total + " minute";
-        String MSG_SUBTITLE_FINISHED = total == 1 ? subtitle_base : subtitle_base + "s";
+        String MSG_TITLE_FINISHED = total == 1 ? subtitle_base : subtitle_base + "s";
+        String MSG_SUBTITLE_FINISHED = "Timer is up! " + MSG_TITLE_FINISHED;
         String MSG_MESSAGE_FINISHED = "Started at " + getTimeMinus(total);
-        NotificationFactory.showNotification("Timer", MSG_TITLE_FINISHED, MSG_SUBTITLE_FINISHED, 1500);
+        NotificationFactory.showNotification(MSG_SUBTITLE_FINISHED);
     }
 
     private void actionOnStop() {
@@ -360,7 +363,7 @@ public class Main extends Application {
 //        System.setProperty("apple.awt.UIElement", "true");
         SwingUtilities.invokeLater(this::addTrayIcon);
         stage = primaryStage;
-        if (storedPref[0] == 0) setStage();
+        setStage();
         Platform.setImplicitExit(false);
     }
 
@@ -526,6 +529,7 @@ public class Main extends Application {
      * until the user selects the Exit menu option from the tray icon.
      */
     public static void main(String[] args) {
+        BasicConfigurator.configure();
         launch(args);
     }
 }

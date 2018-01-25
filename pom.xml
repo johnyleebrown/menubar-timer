@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.grigorii.menubartimer</groupId>
     <artifactId>menubartimer</artifactId>
-    <version>0.1</version>
+    <version>0.1.1</version>
     <name>Timer</name>
     <description>Menu bar timer for macOS</description>
 
@@ -107,7 +107,7 @@
                                            applicationCategory="public.app-category.productivity"
                                            icon="src/main/resources/icons/icon.icns"
                                            mainclassname="${main.class}">
-                                    <classpath file="target/menubartimer-0.1-jar-with-dependencies.jar" />
+                                    <classpath file="target/menubartimer-0.1.1-jar-with-dependencies.jar" />
                                     <!--<runtime dir="${env.JAVA_HOME}" />-->
                                     <librarypath dir="src/main/resources/darwin" includes="*.dylib" />
                                     <option value="-Djna.library.path=$APP_ROOT/Contents/MacOS" />

@@ -51,7 +51,7 @@ public class NSUserNotificationCenter {
 	private static Callback defaultPresentCallback = new Callback() {
 		public byte callback(Pointer n) {
 			logger.debug("PresentCallback. No delegate defined.");
-			return 1;
+			return 0;
 		}
 	};
 

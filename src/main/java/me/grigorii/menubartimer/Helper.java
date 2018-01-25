@@ -71,11 +71,11 @@ public class Helper {
         workTime[2] = o;
     }
 
-    @Deprecated
-    public static void printDate() {
+//    @Deprecated
+    public static String printDate() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
         final String strDate = simpleDateFormat.format(calendar.getTime());
-        System.out.println(strDate);
+        return strDate;
     }
 }
