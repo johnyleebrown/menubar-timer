@@ -24,6 +24,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class NotificationFactory {
 
+	public static void showNotification(String subtitle) {
+		BasicNotification notification = getNotification("Timer", subtitle, "");
+		notification.show(1000, TimeUnit.MILLISECONDS);
+	}
+
 	public static void showNotification(String title, String subtitle, String message, long duration) {
 		BasicNotification notification = getNotification(title, subtitle, message);
 		notification.show(duration, TimeUnit.MILLISECONDS);
