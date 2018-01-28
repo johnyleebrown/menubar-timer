@@ -38,8 +38,6 @@ public class FxTimer {
     private int cycles;
 
     private FxTimer() {
-        workTimeline = new Timeline();
-        lastTimeline = new Timeline();
     }
 
     private static class Helper {
@@ -52,31 +50,23 @@ public class FxTimer {
 
     public void setTimer(int workTime, int restTime, int cycles) {
         this.cycles = cycles;
+        workTimeline = new Timeline(
+            new KeyFrame(Duration.minutes(workTime), e -> {
+                NotificationFactory.showNotification("Time to take a break!");
+                logger.debug("Work is done");
+            }),
+            new KeyFrame(Duration.minutes(workTime + restTime), e -> {
+                NotificationFactory.showNotification("It's time to work!");
+                logger.debug("Break is finished");
+            }));
         workTimeline.setCycleCount(cycles - 1);
-        workTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime), e -> {
-            NotificationFactory.showNotification("Time to take a break!");
-            logger.debug("Work is done");
-        }));
-        workTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime + restTime), e -> {
-            NotificationFactory.showNotification("It's time to work!");
-            logger.debug("Break is finished");
-        }));
-        workTimeline.setOnFinished(this::onStartLastTimeline);
-        lastTimeline.getKeyFrames().add(new KeyFrame(Duration.minutes(workTime)));
-    }
-
-    private void onStartLastTimeline(ActionEvent actionEvent) {
-        lastTimeline.play();
-        currentTimeline = lastTimeline;
-        logger.debug("The last round has started");
+        workTimeline.setOnFinished(e -> startTimer(lastTimeline));
+        lastTimeline = new Timeline(new KeyFrame(Duration.minutes(workTime)));
     }
 
     public void startTimer() {
-        if (cycles == 1) lastTimeline.play();
-        else {
-            workTimeline.play();
-            currentTimeline = workTimeline;
-        }
+        if (cycles == 1) startTimer(lastTimeline);
+        else startTimer(workTimeline);
         logger.debug("The timer started");
     }
 
@@ -93,6 +83,11 @@ public class FxTimer {
     public void stopTimer() {
         currentTimeline.stop();
         logger.debug("The timer stopped " + workTimeline.getCurrentTime().toMinutes());
+    }
+
+    private void startTimer(Timeline t) {
+        currentTimeline = t;
+        currentTimeline.playFromStart();
     }
 
     public void setOnFinished(EventHandler<ActionEvent> eventHandler) {

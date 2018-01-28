@@ -71,7 +71,7 @@ public class Helper {
         workTime[2] = o;
     }
 
-//    @Deprecated
+    @Deprecated
     public static String printDate() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
