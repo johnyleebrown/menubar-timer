@@ -13,8 +13,14 @@
   <img width="342" alt="menubar-timer-stop" src="https://user-images.githubusercontent.com/10441153/35136601-8db6b106-fcf5-11e7-9a19-68bccf46ecac.png">
 </p>
 
+## Features:
+- A menubar icon with ability to control the timer
+- Notifications upon completions
+- App itself, which is easy to use and has no complications 
+
 ## Install:
-- Tested on OS X El Capitan
+- Tested on OS X El Capitan, macOS Catalina 10.15.7
+- Make sure you have [JRE installed](https://www.oracle.com/java/technologies/javase-jre8-downloads.html)
 - Drag the .app into the Applications folder
 - If "Can't be opened because it is from an unidentified developer" - disable gatekeeper with `sudo spctl --master-disable` or from preferences, or you can `sudo spctl --add Timer.app` to add to exceptions
 - To make it open on the start up - go to the Preferences -> User & Groups -> Login items -> add app
